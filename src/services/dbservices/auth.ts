@@ -4,6 +4,9 @@ import { UsersModal, users } from "../../models/schema"
 import { ErrorTypes, throwError } from "../../config/error"
 import { bcryptPassword, validatePassword } from "../../config/passwordHash"
 import { generateAuthTokens } from "../../config/token"
+import services from ".."
+import { envConfig } from "../../config/envConfigs"
+import { SIgnINMethod, emailTemplateForUserVerification } from "../../config/constants"
 
 export class auth {
 
@@ -39,7 +42,8 @@ export class auth {
                     email: details.email,
                     signMethod,
                     userName: details.userName,
-                    password: signMethod ? null : await bcryptPassword(details.password),
+                    password: signMethod === SIgnINMethod.PASSWORD ? await bcryptPassword(details.password) : null,
+                    isVerified: signMethod === SIgnINMethod.PASSWORD ? false : true
                 })
                 .onConflictDoNothing({ target: users.email })
                 .returning({
@@ -49,14 +53,16 @@ export class auth {
                     userName: users.userName,
                     email: users.email,
                     tokens: users.tokens,
-                    signMethod: users.signMethod
+                    signMethod: users.signMethod,
+                    isVerified: users.isVerified
                 });
         } catch (error) {
             throw new Error(error);
         }
     };
 
-    static userDetails = async (users: UsersModal) => {
+    static userDetails = (users: UsersModal) => {
+        if (!users.isVerified) return null
         const Token = generateAuthTokens({ userId: users.userId });
         return {
             userId: users.userId,
@@ -65,9 +71,21 @@ export class auth {
             userName: users.userName,
             tokens: users.tokens,
             signMethod: users.signMethod,
-            token: Token,          
+            token: Token,
         };
     };
+
+    static verifyUser = async (userId: string) => {
+        return await postgreDb.update(users).set({ isVerified: true }).where(eq(users.userId, userId))
+    }
+
+    static sendEmailVerifyLink = async (email: string, userName: string, userId: string) => {
+        const token = generateAuthTokens({ userId: userId })
+        const link = `${envConfig.backendUrl}/auth/verify-email?token=${token}`
+        const subject = "Verify Your Email to Activate Your Account"
+        const template = emailTemplateForUserVerification(email, userName, link)
+        await services.mail.sendEmailWithSEC([email], template, subject)
+    }
 
 
     static register = async (details: any, fromMethod: string): Promise<any> => {
@@ -75,15 +93,16 @@ export class auth {
         return await postgreDb.transaction(async (tx) => {
 
             const registerUser = await this.insertUser(details, tx, fromMethod);
-
             if (registerUser.length <= 0) throwError(ErrorTypes.USER_ALREADY_EXISTS);
-
-            return await this.userDetails(registerUser[0]);
+            if (fromMethod === SIgnINMethod.PASSWORD) {
+                await this.sendEmailVerifyLink(details.email, details.userName, registerUser[0].userId)
+            }
+            return this.userDetails(registerUser[0]);
         });
 
     };
 
-    static loginThroughMethod = async (email: any, fromMethod?: string): Promise<any> => {
+    static loginThroughMethod = async (email: any): Promise<any> => {
         try {
             const findUser = await postgreDb.query.users.findFirst({
                 where: eq(users.email, email),

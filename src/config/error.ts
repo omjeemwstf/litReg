@@ -11,13 +11,23 @@ export enum ErrorTypes {
     EMAIL_NOT_FOUND = "EMAIL_NOT_FOUND",
     PASSWORD_NOT_FOUND = "PASSWORD_NOT_FOUND",
     INVALID_PASSWORD = "INVALID_PASSWORD",
-    USER_ALREADY_EXISTS = "USER_ALREADY_EXISTS"
+    USER_ALREADY_EXISTS = "USER_ALREADY_EXISTS",
+    USER_NOT_VERIFIED = "USER_NOT_VERIFIED",
+    EMAIL_ALREADY_VERIFIED = "EMAIL_ALREADY_VERIFIED"
 }
 
 export const ErrorMessages: Record<ErrorTypes, { message: string; statusCode: number }> = {
     [ErrorTypes.INVALID_TOKEN]: {
         message: 'Expired or invalid token',
         statusCode: 498,
+    },
+    [ErrorTypes.EMAIL_ALREADY_VERIFIED]: {
+        message: 'Your Email is already verified you can login directly',
+        statusCode: 400,
+    },
+    [ErrorTypes.USER_NOT_VERIFIED]: {
+        message: 'You have not verified though the email that we sent you on you mailBox',
+        statusCode: 400,
     },
     [ErrorTypes.USER_ALREADY_EXISTS]: {
         message: 'User Already exists',

@@ -1,4 +1,4 @@
-import { pgTable, serial, varchar } from "drizzle-orm/pg-core";
+import { boolean, pgTable, serial, varchar } from "drizzle-orm/pg-core";
 import { InferSelectModel } from "drizzle-orm";
 
 
@@ -10,7 +10,8 @@ export const users = pgTable("users", {
     userName: varchar("userName"),
     phone: varchar("phone"),
     tokens: varchar("tokens"),
-    signMethod: varchar("signMethod")
+    signMethod: varchar("signMethod"),
+    isVerified: boolean("isVerified")
 })
 
 export type UsersModal = InferSelectModel<typeof users>;

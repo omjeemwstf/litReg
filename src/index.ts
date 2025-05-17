@@ -5,15 +5,24 @@ import { jwtStrategy } from "./config/token";
 import logger from "./config/logger";
 import { envConfig } from "./config/envConfigs";
 import router from "./router";
-import postgreDb from "./config/db";
+import cookieParser from "cookie-parser"
 
 const app = express();
-// postgreDb;
-
+app.use(cookieParser())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(cors({ origin: "*" }));
+
+const corsOptions = {
+    origin: "*",
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    // allowedHeaders: ['Content-Type', 'Authorization'],
+    // exposedHeaders: ['Set-Cookie']
+};
+
+app.use(cors(corsOptions));
+
 passport.use('jwt', jwtStrategy);
 
 app.use("/", router);
