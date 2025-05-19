@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { successResponse } from "../../config/response";
+import { errorResponse, successResponse } from "../../config/response";
 import { ErrorTypes, handleError, throwError } from "../../config/error";
 import services from "../../services";
 import { envConfig } from "../../config/envConfigs";
@@ -7,14 +7,17 @@ import axios from "axios";
 import { verifyTokenAndGetPayload } from "../../config/token";
 import url from "node:url";
 import { AUTH_TOKEN, SIgnINMethod } from "../../config/constants";
+import postgreDb from "../../config/db";
+import { users } from "../../models/schema";
+import { eq } from "drizzle-orm";
 
 export class auth {
 
     static setCookie: any = async (res: Response, token: string) => {
         return res.cookie(AUTH_TOKEN, token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: "none",
+            httpOnly: false,
+            secure: false,
+            sameSite: "lax",
             maxAge: envConfig.jwt.expires,
             path: "/"
         })
@@ -25,8 +28,9 @@ export class auth {
             const { email, password } = req.body;
             if (!email) throwError(ErrorTypes.EMAIL_NOT_FOUND)
             const user = await services.auth.login(email, password);
-            if (!user) throwError(ErrorTypes.USER_NOT_VERIFIED)
-            this.setCookie(res, user.token)
+            // if (!user) throwError(ErrorTypes.USER_NOT_VERIFIED)
+            if (user.isVerified) this.setCookie(res, user.token)
+            // console.log(res)
             return successResponse(res, 200, "User logged in successfully!", user)
         } catch (error) {
             return handleError(res, error)
@@ -40,10 +44,23 @@ export class auth {
                 { email, password, userName },
                 SIgnINMethod.PASSWORD
             );
+            console.log("Unverfihvbjkndl>>>>>>>>>>>>> ", user)
             if (user) this.setCookie(res, user.token)
-            return successResponse(res, 200, "User registered Successfully!", user)
+            return successResponse(res, 200, "User registered Successfully, Please verify youe email", user)
         } catch (error) {
             return handleError(res, error)
+        }
+    }
+
+    static deleteUser: any = async (req: Request, res: Response) => {
+        const { email } = req.body
+        try {
+            await postgreDb.delete(users).where(eq(email, users.email))
+            return successResponse(res, 200, "User deleted successfully")
+
+
+        } catch (error) {
+            return errorResponse(res, 400, "Error in deleting user")
         }
     }
 

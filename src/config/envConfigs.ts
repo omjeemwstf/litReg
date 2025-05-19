@@ -2,7 +2,7 @@ import { configDotenv } from "dotenv";
 import { z } from "zod";
 
 const env = process.env.NODE_ENV || 'development';
-configDotenv({ path: `.env.${env}` })
+// configDotenv({ path: `.env.${env}` })
 
 
 export const envVarsSchema = z.object({
@@ -55,5 +55,5 @@ export const envConfig = {
     },
 }
 
-console.log(envConfig)
+// console.log(envConfig)
 

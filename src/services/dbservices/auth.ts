@@ -62,12 +62,12 @@ export class auth {
     };
 
     static userDetails = (users: UsersModal) => {
-        if (!users.isVerified) return null
-        const Token = generateAuthTokens({ userId: users.userId });
+        const Token = users.isVerified ? generateAuthTokens({ userId: users.userId }) : "";
         return {
             userId: users.userId,
             email: users.email,
             phone: users.phone,
+            isVerified : users.isVerified,
             userName: users.userName,
             tokens: users.tokens,
             signMethod: users.signMethod,
