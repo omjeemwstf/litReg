@@ -1,7 +1,8 @@
 import { configDotenv } from "dotenv";
 import { z } from "zod";
 
-const env = process.env.NODE_ENV || 'development';
+const env = process.env.NODE_ENV || 'development';4
+configDotenv()
 // configDotenv({ path: `.env.${env}` })
 
 
