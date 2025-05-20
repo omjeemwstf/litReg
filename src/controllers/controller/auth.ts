@@ -15,9 +15,9 @@ export class auth {
 
     static setCookie: any = async (res: Response, token: string) => {
         return res.cookie(AUTH_TOKEN, token, {
-            httpOnly: false,
-            secure: false,
-            sameSite: "lax",
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
             maxAge: envConfig.jwt.expires,
             path: "/"
         })
