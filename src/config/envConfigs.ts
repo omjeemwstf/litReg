@@ -23,7 +23,8 @@ export const envVarsSchema = z.object({
     AWS_SECRET_KEY: z.string(),
     AWS_FROM_EMAIL_ADDRESS: z.string(),
     BACKEND_URL: z.string(),
-    FRONTEND_URL: z.string()
+    FRONTEND_URL: z.string(),
+    AI_BACKEND_URL: z.string()
 })
 
 const envVars = envVarsSchema.parse(process.env)
@@ -31,6 +32,7 @@ const envVars = envVarsSchema.parse(process.env)
 export const envConfig = {
     databaseUrl: envVars.DATABASE_URL,
     port: envVars.PORT,
+    aiBackendUrl: envVars.AI_BACKEND_URL,
     jwt: {
         secret: envVars.JWT_SECRET,
         expires: envVars.JWT_EXPIRES

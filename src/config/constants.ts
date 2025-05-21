@@ -1,8 +1,8 @@
 
 export enum SIgnINMethod {
-    MICROSOFT = "microsoft",
-    GOOGLE = 'google',
-    PASSWORD = 'password'
+  MICROSOFT = "microsoft",
+  GOOGLE = 'google',
+  PASSWORD = 'password'
 }
 
 export const AUTH_TOKEN = "token"
@@ -34,3 +34,8 @@ export const emailTemplateForUserVerification = (email: string, name: string, ve
     </div>
   </div>
 `;
+
+export const generateRandomUUId = () => {
+  return Math.random().toString(36).substr(2, 8).toUpperCase();
+}
+

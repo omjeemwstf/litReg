@@ -9,8 +9,11 @@ export const authMiddleware: any = (
     next: NextFunction,
 ) => {
     try {
-        const token = req.cookies[AUTH_TOKEN];
-        console.log("TOken is ", token, req.cookies)
+        // const token = req.cookies[AUTH_TOKEN];
+        const auth = req.headers.authorization;
+        const token = auth?.split(" ")[1];
+
+        // console.log("TOken is ", token, req.cookies)
         if (!token) {
             throwError(ErrorTypes.INVALID_TOKEN);
         }
@@ -18,8 +21,8 @@ export const authMiddleware: any = (
         if (!decoded) {
             throwError(ErrorTypes.INVALID_TOKEN);
         }
-        console.log("Decoded is ", decoded)
-        req["user"] = decoded;
+        // console.log("Decoded is ", decoded)
+        req["user"] = decoded.payload;
         next();
     } catch (error) {
         console.log("Error in middleware >> ", error)

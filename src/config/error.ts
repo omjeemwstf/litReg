@@ -76,13 +76,13 @@ export class CustomError extends Error {
 export const handleError = (res: Response, err: unknown) => {
     console.log("Error is ", err)
     if (err instanceof CustomError) {
-        logger.error(err.message, err)
+        // logger.error(err.message, err)
         return errorResponse(res, err.status, err.message);
     } else if (err instanceof Error) {
-        logger.error(err.message, err)
+        // logger.error(err.message, err)
         return errorResponse(res, 500, err.message);
     } else {
-        logger.error("Internal Server Error", err)
+        // logger.error("Internal Server Error", err)
         return errorResponse(res, 500, "Internal Server Error");
     }
 };

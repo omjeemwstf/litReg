@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import authRouter from "./routes/auth";
 import { successResponse } from "../config/response";
 import userRouter from "./routes/user";
+import  documentsRouter  from "./routes/documents";
 
 const router = express.Router()
 
@@ -14,6 +15,10 @@ const routes = [
     {
         path: "/user",
         route: userRouter
+    },
+    {
+        path : "/documents",
+        route : documentsRouter
     }
 ]
 
