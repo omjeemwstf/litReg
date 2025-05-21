@@ -46,7 +46,8 @@ export class documents {
         if (!integerUserId) {
             throw throwError(ErrorTypes.USER_NOT_FOUND)
         }
-        if (parentId) {
+        if (parentId && parentId !== "null" && parentId !== "") {
+            console.log("Parent id is ", parentId)
             const folder = await services.documents.isFolderExists(parentId)
             if (!folder) {
                 throwError(ErrorTypes.PARENT_FOLDER_NOT_EXISTS)
@@ -55,6 +56,7 @@ export class documents {
                 throw throwError(ErrorTypes.CANNOT_STORE_DATA_INSIDE_FILE)
             }
         }
+        console.log("Inyteger >>> ", integerUserId)
         return integerUserId.id
     }
 
@@ -64,6 +66,7 @@ export class documents {
         try {
             const userId = req["user"]["userId"]
             const parentId = req.body.parentId
+            console.log("Parent id is ", parentId)
             const formData = new FormData();
             const integerUserId = await this.validateUserAndFolder(userId, parentId)
 
@@ -87,7 +90,7 @@ export class documents {
                 return {
                     id: file.id,
                     name: file.name,
-                    parentId: parentId ? parentId : null,
+                    parentId: parentId !== "null" && parentId ? parentId : null,
                     userId: integerUserId,
                     link: file.link,
                     type: FolderObjectType.FILE
@@ -96,6 +99,7 @@ export class documents {
             const folderFileData = await services.documents.addFiles(filesArray)
             return successResponse(res, 200, "File Uploaded Successfully", folderFileData)
         } catch (error) {
+            console.log("Error in uploading ", error)
             return handleError(res, error)
         }
     }
