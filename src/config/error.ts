@@ -13,13 +13,24 @@ export enum ErrorTypes {
     INVALID_PASSWORD = "INVALID_PASSWORD",
     USER_ALREADY_EXISTS = "USER_ALREADY_EXISTS",
     USER_NOT_VERIFIED = "USER_NOT_VERIFIED",
-    EMAIL_ALREADY_VERIFIED = "EMAIL_ALREADY_VERIFIED"
+    EMAIL_ALREADY_VERIFIED = "EMAIL_ALREADY_VERIFIED",
+    PARENT_FOLDER_NOT_EXISTS = "PARENT_FOLDER_NOT_EXISTS",
+    CANNOT_STORE_DATA_INSIDE_FILE = "CANNOT_STORE_DATA_INSIDE_FILE"
+
 }
 
 export const ErrorMessages: Record<ErrorTypes, { message: string; statusCode: number }> = {
     [ErrorTypes.INVALID_TOKEN]: {
         message: 'Expired or invalid token',
         statusCode: 498,
+    },
+    [ErrorTypes.CANNOT_STORE_DATA_INSIDE_FILE]: {
+        message: 'You Cannot Store folder or files inside the file',
+        statusCode: 400,
+    },
+    [ErrorTypes.PARENT_FOLDER_NOT_EXISTS]: {
+        message: 'Parent Folder you mentioned is not exists',
+        statusCode: 400,
     },
     [ErrorTypes.EMAIL_ALREADY_VERIFIED]: {
         message: 'Your Email is already verified you can login directly',

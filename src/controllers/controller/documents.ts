@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { handleError } from "../../config/error"
+import { ErrorTypes, handleError, throwError } from "../../config/error"
 import { successResponse } from "../../config/response"
 import services from "../../services"
 import { FolderObjectType } from "../../types/user"
@@ -10,64 +10,63 @@ import { envConfig } from "../../config/envConfigs"
 
 
 export class documents {
-    static addFolderOrFile: any = async (req: Request, res: Response) => {
-        try {
-            const userId = req["user"]["userId"]
-            const { folderName, parentId } = req.body
-            console.log("Request body is ", req.body)
-            if (!folderName) {
-                throw new Error("FolderName is required")
-            }
-            if (parentId) {
-                const isParentExists = await services.user.isFolderExists(parentId)
-                if (!isParentExists) {
-                    throw new Error("The Parent folder you mentioned is not exists")
-                }
-                if (isParentExists.type === FolderObjectType.FILE) {
-                    throw new Error("You cannot append file into file")
-                }
-            }
-            const integerUserId = await services.user.getUserById(userId)
-            const data = await services.user.addFolderOrFile(folderName, parentId, FolderObjectType.FOLDER, integerUserId.id, [])
-            return successResponse(res, 200, "Folder Added Successfully", data)
-        } catch (error) {
-            return handleError(res, error)
-        }
-    }
 
-    static getAllFolders: any = async (req: Request, res: Response) => {
+
+    static getAllFoldersAndFiles: any = async (req: Request, res: Response) => {
         try {
             const userId = req["user"]["userId"]
             const integerUserId = await services.user.getUserById(userId)
             if (!integerUserId) {
                 throw new Error("User not exists")
             }
-            const data = await services.user.getALlUserFolders(integerUserId.id)
+            const data = await services.documents.getALLUserFoldersAndFiles(integerUserId.id)
             return successResponse(res, 200, "All folders retrive successfully", data)
         } catch (error) {
             return handleError(res, error)
         }
     }
-    
+
+    static uploadFolder: any = async (req: Request, res: Response) => {
+        try {
+            const userId = req["user"]["userId"]
+            const { folderName, parentId } = req.body
+            if (!folderName) {
+                throw new Error("FolderName is required")
+            }
+            const integerUserId = await this.validateUserAndFolder(userId, parentId)
+            const data = await services.documents.addFolder(folderName, parentId, FolderObjectType.FOLDER, integerUserId)
+            return successResponse(res, 200, "Folder Added Successfully", data)
+        } catch (error) {
+            return handleError(res, error)
+        }
+    }
+
+    private static validateUserAndFolder = async (userId: string, parentId: string) => {
+        const integerUserId = await services.user.getUserById(userId)
+        if (!integerUserId) {
+            throw throwError(ErrorTypes.USER_NOT_FOUND)
+        }
+        if (parentId) {
+            const folder = await services.documents.isFolderExists(parentId)
+            if (!folder) {
+                throwError(ErrorTypes.PARENT_FOLDER_NOT_EXISTS)
+            }
+            if (folder.type === FolderObjectType.FILE) {
+                throw throwError(ErrorTypes.CANNOT_STORE_DATA_INSIDE_FILE)
+            }
+        }
+        return integerUserId.id
+    }
+
+
 
     static uploadFile: any = async (req: Request, res: Response) => {
         try {
             const userId = req["user"]["userId"]
-            const integerUserId = await services.user.getUserById(userId)
-            if (!integerUserId) {
-                throw new Error("User not Exists")
-            }
-            const formData = new FormData();
             const parentId = req.body.parentId
-            if (parentId) {
-                const folder = await services.user.isFolderExists(parentId)
-                if (!folder) {
-                    throw new Error("The parent folder you mentiond is not exists")
-                }
-                if (folder.type === FolderObjectType.FILE) {
-                    throw new Error("You cannot store file inside file")
-                }
-            }
+            const formData = new FormData();
+            const integerUserId = await this.validateUserAndFolder(userId, parentId)
+
             if (req["file"]) {
                 formData.append('file', fs.createReadStream(req["file"].path), req["file"].originalname);
             } else {
@@ -89,43 +88,49 @@ export class documents {
                     id: file.id,
                     name: file.name,
                     parentId: parentId ? parentId : null,
-                    userId: integerUserId.id,
-                    link : file.link,
+                    userId: integerUserId,
+                    link: file.link,
                     type: FolderObjectType.FILE
                 }
             })
-            const folderFileData = await services.user.addFiles(filesArray)
-            console.log("data is >>>>>>>>>>> ", data, folderFileData)
+            const folderFileData = await services.documents.addFiles(filesArray)
             return successResponse(res, 200, "File Uploaded Successfully", folderFileData)
         } catch (error) {
             return handleError(res, error)
         }
     }
+
+
     static uploadMultipleFiles: any = async (req: Request, res: Response) => {
         try {
-            const userId = req["user"]["userId"];
+            const userId = req["user"]["userId"]
+            const parentId = req.body.parentId
             const formData = new FormData();
-
-            if (req.body.collectionName) {
-                formData.append('collection_name', req.body.contract);
-            }
+            const integerUserId = await this.validateUserAndFolder(userId, parentId)
 
             if (req["files"] && Array.isArray(req["files"])) {
                 req["files"].forEach((file: Express.Multer.File) => {
                     formData.append('files', fs.createReadStream(file.path), file.originalname);
                 });
             }
-
             const response = await axios.post(`${envConfig.aiBackendUrl}/upload-and-ingest`, formData, {
                 headers: {
                     ...formData.getHeaders()
                 }
             });
-
-            const data = response.data;
-            console.log("data is >>>>>>>>>>> ", data);
-
-            return successResponse(res, 200, "Files Uploaded Successfully", data);
+            const files = response.data.data;
+            const filesArray: any = files.map((file: any) => {
+                return {
+                    id: file.id,
+                    name: file.name,
+                    parentId: parentId ? parentId : null,
+                    userId: integerUserId,
+                    link: file.link,
+                    type: FolderObjectType.FILE
+                }
+            })
+            const folderFileData = await services.documents.addFiles(filesArray)
+            return successResponse(res, 200, "Files Uploaded Successfully", folderFileData);
         } catch (error) {
             return handleError(res, error);
         }
