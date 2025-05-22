@@ -15,7 +15,8 @@ export enum ErrorTypes {
     USER_NOT_VERIFIED = "USER_NOT_VERIFIED",
     EMAIL_ALREADY_VERIFIED = "EMAIL_ALREADY_VERIFIED",
     PARENT_FOLDER_NOT_EXISTS = "PARENT_FOLDER_NOT_EXISTS",
-    CANNOT_STORE_DATA_INSIDE_FILE = "CANNOT_STORE_DATA_INSIDE_FILE"
+    CANNOT_STORE_DATA_INSIDE_FILE = "CANNOT_STORE_DATA_INSIDE_FILE",
+    DUPLICATE_FILE_NAME_NOT_ALLOWED = "DUPLICATE_FILE_NAME_NOT_ALLOWED"
 
 }
 
@@ -26,6 +27,10 @@ export const ErrorMessages: Record<ErrorTypes, { message: string; statusCode: nu
     },
     [ErrorTypes.CANNOT_STORE_DATA_INSIDE_FILE]: {
         message: 'You Cannot Store folder or files inside the file',
+        statusCode: 400,
+    },
+    [ErrorTypes.DUPLICATE_FILE_NAME_NOT_ALLOWED]: {
+        message: 'Duplicate files names are not allowed',
         statusCode: 400,
     },
     [ErrorTypes.PARENT_FOLDER_NOT_EXISTS]: {

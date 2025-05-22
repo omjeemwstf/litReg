@@ -116,9 +116,7 @@ export class documents {
         const filePath = req["file"].path
         let meta: any = {}
         try {
-
             const integerUserId = await this.validateUserAndFolder(userId, parentId)
-
             if (req["file"]) {
                 const file = req["file"];
                 meta.originalname = file.originalname
@@ -134,10 +132,9 @@ export class documents {
                 }
             })
             const data = response.data.data
-            console.log("Response is >>>>>>>>>>> ", data, "$$$", response.data)
             const id = data.id
             const title = data.title
-            const link = response.data.link
+            const link = data.url
             const files = [{ id, name: title, link, meta }]
             const filesArray: any = files.map((file) => {
                 return {
@@ -182,10 +179,17 @@ export class documents {
             const formData = new FormData();
             const integerUserId = await this.validateUserAndFolder(userId, parentId)
 
+            const set = new Set()
+
             if (req["files"] && Array.isArray(req["files"])) {
                 req["files"].forEach((file: Express.Multer.File) => {
                     formData.append('files', fs.createReadStream(file.path), file.originalname);
                     filePaths.push(file.path);
+                    if (set.has(file.originalname)) {
+                        throwError(ErrorTypes.DUPLICATE_FILE_NAME_NOT_ALLOWED)
+                    } else {
+                        set.add(file.originalname)
+                    }
                     metaInfo.push({
                         originalname: file.originalname,
                         mimetype: file.mimetype,
@@ -193,19 +197,17 @@ export class documents {
                     })
                 });
             }
-            console.log("Mets info ", metaInfo)
             const response = await axios.post(`${envConfig.aiBackendUrl}/upload-multiple-and-ingest`, formData, {
                 headers: {
                     ...formData.getHeaders()
                 }
             });
             const responseData = response.data;
-            console.log("Response data is >>>>>> ", responseData)
-            const files = responseData.uploaded_files?.map((data: any, index: number) => {
+            const files = responseData.data?.map((data: any, index: number) => {
                 return {
-                    name: responseData.data[index].title,
-                    id: responseData.data[index]._id,
-                    link: data.url,
+                    name: data.title,
+                    id: data._id,
+                    link: data.link,
                     meta: metaInfo[index] ? metaInfo[index] : null
                 }
             })
@@ -221,9 +223,7 @@ export class documents {
                     meta: file.meta
                 }
             })
-            console.log("Files array ", filesArray)
             const folderFileData = await services.documents.addFiles(filesArray)
-            console.log("Folder file path data >>>> ", folderFileData)
             this.deleteFilePaths(filePaths)
             return successResponse(res, 200, responseData.message || "File Uploaded Successfully!", folderFileData);
         } catch (error) {
