@@ -83,10 +83,10 @@ export class documents {
                 }
             })
             const data = response.data.data
-            console.log("Response is >>>>>>>>>>> ", data)
+            console.log("Response is >>>>>>>>>>> ", data,"$$$", response.data)
             const id = data.id
             const title = data.title
-            const link = data.link
+            const link = response.data.link
             const files = [{ id, name: title, link }]
             const filesArray: any = files.map((file) => {
                 return {
@@ -100,7 +100,7 @@ export class documents {
             })
             const folderFileData = await services.documents.addFiles(filesArray)
             this.deleteFilePaths([filePath])
-            return successResponse(res, 200, "File Uploaded Successfully", folderFileData)
+            return successResponse(res, 200, response.data.message || "File Uploaded Successfully", folderFileData)
         } catch (error) {
             this.deleteFilePaths([filePath])
             console.log("Error in uploading ", error)
