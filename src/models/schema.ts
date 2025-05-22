@@ -21,6 +21,7 @@ export const folders = pgTable("folders", {
     parentId: varchar().references(() => folders.id),
     type: varchar().notNull(),
     link : varchar(),
+    meta : jsonb(),
     createdAt: timestamp().defaultNow(),
     userId: integer().references(() => users.id),
 });

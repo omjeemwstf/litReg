@@ -6,12 +6,12 @@ import { upload } from "../../config/multer";
 const documentsRouter = express.Router()
 
 
-documentsRouter.use(authMiddleware)
 
-documentsRouter.get("/folders", controllers.documents.getAllFoldersAndFiles)
-documentsRouter.post("/folders", controllers.documents.uploadFolder)
-documentsRouter.post("/file/single", upload.single("file"), authMiddleware, controllers.documents.uploadFile)
-documentsRouter.post('/file/multiple', upload.array('files'), controllers.documents.uploadMultipleFiles);
+documentsRouter.get("/", controllers.documents.proxyPdf)
+documentsRouter.get("/folders", authMiddleware, controllers.documents.getAllFoldersAndFiles)
+documentsRouter.post("/folders", authMiddleware, controllers.documents.uploadFolder)
+documentsRouter.post("/file/single", authMiddleware, upload.single("file"), authMiddleware, controllers.documents.uploadFile)
+documentsRouter.post('/file/multiple', authMiddleware, upload.array('files'), controllers.documents.uploadMultipleFiles);
 
 
 export default documentsRouter;

@@ -3,7 +3,25 @@ CREATE TABLE IF NOT EXISTS "folders" (
 	"name" varchar NOT NULL,
 	"parentId" varchar,
 	"type" varchar NOT NULL,
+	"link" varchar,
+	"meta" jsonb,
+	"createdAt" timestamp DEFAULT now(),
 	"userId" integer
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "users" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"userId" varchar,
+	"email" varchar,
+	"password" varchar,
+	"userName" varchar,
+	"phone" varchar,
+	"tokens" varchar,
+	"signMethod" varchar,
+	"isVerified" boolean,
+	"documents" jsonb,
+	CONSTRAINT "users_userId_unique" UNIQUE("userId"),
+	CONSTRAINT "users_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
 DO $$ BEGIN

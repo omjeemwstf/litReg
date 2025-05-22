@@ -5,50 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1747402646458,
-      "tag": "0000_high_dark_phoenix",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1747472256898,
-      "tag": "0001_outgoing_mystique",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1747732957363,
-      "tag": "0002_vengeful_toxin",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1747802580577,
-      "tag": "0003_famous_scrambler",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1747812066962,
-      "tag": "0004_lethal_wolf_cub",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1747894572428,
-      "tag": "0005_nervous_machine_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1747894592725,
-      "tag": "0006_amusing_typhoid_mary",
+      "when": 1747896391518,
+      "tag": "0000_colossal_wolfsbane",
       "breakpoints": true
     }
   ]

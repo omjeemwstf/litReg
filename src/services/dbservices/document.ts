@@ -19,6 +19,7 @@ export class documents {
                     type: folder.type,
                     parentId: folder.parentId,
                     ...(folder.type === FolderObjectType.FILE && { link: folder.link }),
+                    ...(folder.type === FolderObjectType.FILE && { meta: folder.meta }),
                     createdAt: folder.createdAt,
                     children: buildTree(folderList, folder.id)
                 }));
@@ -42,7 +43,8 @@ export class documents {
                 parentId: string,
                 userId: string,
                 type: FolderObjectType.FILE,
-                link: string
+                link: string,
+                meta : any
             }[]
     ) => {
         console.log("Add files data is ", files)
@@ -55,6 +57,7 @@ export class documents {
                 parentId: folders.parentId,
                 type: folders.type,
                 link: folders.link,
+                meta : folders.meta,
                 createdAt: folders.createdAt
             })
         return addFiles;
