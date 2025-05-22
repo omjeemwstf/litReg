@@ -1,4 +1,4 @@
-import { boolean, integer, jsonb, pgTable, serial, varchar } from "drizzle-orm/pg-core";
+import { boolean, integer, jsonb, pgTable, serial, timestamp, varchar } from "drizzle-orm/pg-core";
 import { InferSelectModel, relations } from "drizzle-orm";
 
 
@@ -21,6 +21,7 @@ export const folders = pgTable("folders", {
     parentId: varchar().references(() => folders.id),
     type: varchar().notNull(),
     link : varchar(),
+    createdAt: timestamp().defaultNow(),
     userId: integer().references(() => users.id),
 });
 

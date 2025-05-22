@@ -63,15 +63,17 @@ export class documents {
 
 
     static uploadFile: any = async (req: Request, res: Response) => {
+        const userId = req["user"]["userId"]
+        const parentId = req.body.parentId
+        const formData = new FormData();
+        const filePath = req["file"].path
+
         try {
-            const userId = req["user"]["userId"]
-            const parentId = req.body.parentId
-            console.log("Parent id is ", parentId)
-            const formData = new FormData();
+
             const integerUserId = await this.validateUserAndFolder(userId, parentId)
 
             if (req["file"]) {
-                formData.append('file', fs.createReadStream(req["file"].path), req["file"].originalname);
+                formData.append('file', fs.createReadStream(filePath), req["file"].originalname);
             } else {
                 throw new Error("File is required")
             }
@@ -97,15 +99,30 @@ export class documents {
                 }
             })
             const folderFileData = await services.documents.addFiles(filesArray)
+            this.deleteFilePaths([filePath])
             return successResponse(res, 200, "File Uploaded Successfully", folderFileData)
         } catch (error) {
+            this.deleteFilePaths([filePath])
             console.log("Error in uploading ", error)
             return handleError(res, error)
         }
     }
 
+    static deleteFilePaths = (filePaths: string[]) => {
+        for (const path of filePaths) {
+            fs.unlink(path, (err) => {
+                if (err) {
+                    console.error(`Failed to delete file: ${path}`, err);
+                } else {
+                    console.log(`Deleted temp file: ${path}`);
+                }
+            });
+        }
+    }
+
 
     static uploadMultipleFiles: any = async (req: Request, res: Response) => {
+        const filePaths: string[] = [];
         try {
             const userId = req["user"]["userId"]
             const parentId = req.body.parentId
@@ -115,14 +132,24 @@ export class documents {
             if (req["files"] && Array.isArray(req["files"])) {
                 req["files"].forEach((file: Express.Multer.File) => {
                     formData.append('files', fs.createReadStream(file.path), file.originalname);
+                    filePaths.push(file.path);
                 });
             }
-            const response = await axios.post(`${envConfig.aiBackendUrl}/upload-and-ingest`, formData, {
+            const response = await axios.post(`${envConfig.aiBackendUrl}/upload-multiple-and-ingest`, formData, {
                 headers: {
                     ...formData.getHeaders()
                 }
             });
-            const files = response.data.data;
+            const responseData = response.data;
+            console.log("Response data is >>>>>> ", responseData)
+            const files = responseData.uploaded_files?.map((data: any, index: number) => {
+                return {
+                    name: responseData.data[index].title,
+                    id: responseData.data[index]._id,
+                    link: data.url
+                }
+            })
+            console.log("Files >>>>>>>>>>>>> ", files)
             const filesArray: any = files.map((file: any) => {
                 return {
                     id: file.id,
@@ -133,9 +160,13 @@ export class documents {
                     type: FolderObjectType.FILE
                 }
             })
+            console.log("Files array ", filesArray)
             const folderFileData = await services.documents.addFiles(filesArray)
-            return successResponse(res, 200, "Files Uploaded Successfully", folderFileData);
+            console.log("Folder file path data >>>> ", folderFileData)
+            this.deleteFilePaths(filePaths)
+            return successResponse(res, 200, responseData.message || "File Uploaded Successfully!", folderFileData);
         } catch (error) {
+            this.deleteFilePaths(filePaths)
             return handleError(res, error);
         }
     };

@@ -36,6 +36,20 @@
       "when": 1747812066962,
       "tag": "0004_lethal_wolf_cub",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1747894572428,
+      "tag": "0005_nervous_machine_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1747894592725,
+      "tag": "0006_amusing_typhoid_mary",
+      "breakpoints": true
     }
   ]
 }
