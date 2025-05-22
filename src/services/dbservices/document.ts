@@ -18,8 +18,8 @@ export class documents {
                     name: folder.name,
                     type: folder.type,
                     parentId: folder.parentId,
-                    link: folder.link,
-                    createdAT: folder.createdAt,
+                    ...(folder.type === FolderObjectType.FILE && { link: folder.link }),
+                    createdAt: folder.createdAt,
                     children: buildTree(folderList, folder.id)
                 }));
         }
@@ -55,7 +55,7 @@ export class documents {
                 parentId: folders.parentId,
                 type: folders.type,
                 link: folders.link,
-                createdAt : folders.createdAt
+                createdAt: folders.createdAt
             })
         return addFiles;
     }
@@ -81,6 +81,7 @@ export class documents {
                 name: folders.name,
                 parentId: folders.parentId,
                 type: folders.type,
+                createdAt: folders.createdAt
             })
 
         return addFOlder
