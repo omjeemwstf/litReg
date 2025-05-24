@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import postgreDb from "../../config/db";
-import { folders } from "../../models/schema";
+import { folders, sets, setsToFolders } from "../../models/schema";
 import { FolderObjectType } from "../../types/user";
 import { generateRandomUUId } from "../../config/constants";
 
@@ -44,7 +44,7 @@ export class documents {
                 userId: string,
                 type: FolderObjectType.FILE,
                 link: string,
-                meta : any
+                meta: any
             }[]
     ) => {
         console.log("Add files data is ", files)
@@ -57,7 +57,7 @@ export class documents {
                 parentId: folders.parentId,
                 type: folders.type,
                 link: folders.link,
-                meta : folders.meta,
+                meta: folders.meta,
                 createdAt: folders.createdAt
             })
         return addFiles;

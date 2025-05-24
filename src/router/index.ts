@@ -3,6 +3,7 @@ import authRouter from "./routes/auth";
 import { successResponse } from "../config/response";
 import userRouter from "./routes/user";
 import  documentsRouter  from "./routes/documents";
+import setsRouter from "./routes/sets";
 
 const router = express.Router()
 
@@ -19,6 +20,10 @@ const routes = [
     {
         path : "/documents",
         route : documentsRouter
+    },
+    {
+        path : "/sets",
+        route : setsRouter
     }
 ]
 

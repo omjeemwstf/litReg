@@ -1,4 +1,4 @@
-import { Request, Response } from "express"
+import { Request, Response, response } from "express"
 import { ErrorTypes, handleError, throwError } from "../../config/error"
 import { successResponse } from "../../config/response"
 import services from "../../services"
@@ -13,6 +13,7 @@ import { URL } from 'url';
 
 
 export class documents {
+
 
 
 

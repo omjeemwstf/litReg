@@ -16,7 +16,8 @@ export enum ErrorTypes {
     EMAIL_ALREADY_VERIFIED = "EMAIL_ALREADY_VERIFIED",
     PARENT_FOLDER_NOT_EXISTS = "PARENT_FOLDER_NOT_EXISTS",
     CANNOT_STORE_DATA_INSIDE_FILE = "CANNOT_STORE_DATA_INSIDE_FILE",
-    DUPLICATE_FILE_NAME_NOT_ALLOWED = "DUPLICATE_FILE_NAME_NOT_ALLOWED"
+    DUPLICATE_FILE_NAME_NOT_ALLOWED = "DUPLICATE_FILE_NAME_NOT_ALLOWED",
+    SET_NOT_BELONGS_TO_THIS_USER = "SET_NOT_BELONGS_TO_THIS_USER"
 
 }
 
@@ -28,6 +29,10 @@ export const ErrorMessages: Record<ErrorTypes, { message: string; statusCode: nu
     [ErrorTypes.CANNOT_STORE_DATA_INSIDE_FILE]: {
         message: 'You Cannot Store folder or files inside the file',
         statusCode: 400,
+    },
+    [ErrorTypes.SET_NOT_BELONGS_TO_THIS_USER]: {
+        message: 'This set is not belongs to this user',
+        statusCode: 403,
     },
     [ErrorTypes.DUPLICATE_FILE_NAME_NOT_ALLOWED]: {
         message: 'Duplicate files names are not allowed',
@@ -96,7 +101,7 @@ export const handleError = (res: Response, err: unknown) => {
         return errorResponse(res, err.status, err.message);
     } else if (err instanceof Error) {
         // logger.error(err.message, err)
-        return errorResponse(res, 500, err.message);
+        return errorResponse(res, 400, err.message);
     } else {
         // logger.error("Internal Server Error", err)
         return errorResponse(res, 500, "Internal Server Error");
