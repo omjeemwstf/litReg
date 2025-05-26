@@ -80,14 +80,20 @@ export class set {
         }
     }
 
-    static getAllSetQueries: any = async (req: Request, res: Response) => {
+    static getAllSetQueriesById: any = async (req: Request, res: Response) => {
         try {
             const userId = req["user"]["userId"]
             const setId = req.params.setId
-
+            console.log("Set id is ", setId)
             if (!setId) {
                 throw new Error("Set Id is required")
             }
+            const data = await services.set.getAllSetsQueryById(setId, userId)
+            console.log("Data query set s??? ", data)
+            const response = await axios.post(`${envConfig.aiBackendUrl}/get-query`, {
+                doc_ids: data
+            })
+            return successResponse(res, 200, "Sets Data", response.data)
         } catch (error) {
             return handleError(res, error)
         }

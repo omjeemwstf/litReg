@@ -17,48 +17,6 @@ export class documents {
 
 
 
-    static proxyPdf: any = (req: Request, res: Response) => {
-        const src = req.query.src as string;
-
-        if (!src) {
-            return res.status(400).send('Missing "src" query parameter.');
-        }
-
-        try {
-            const url = new URL(src);
-            const client = url.protocol === 'https:' ? https : http;
-
-            const options = {
-                headers: {
-                    'User-Agent': 'Mozilla/5.0',
-                    'Accept': 'application/pdf',
-                },
-            };
-
-            client.get(src, options, (pdfRes) => {
-                if (pdfRes.statusCode !== 200) {
-                    console.error(`PDF fetch failed. Status code: ${pdfRes.statusCode}`);
-                    return res.status(pdfRes.statusCode || 500).send('Failed to fetch PDF.');
-                }
-
-                // Forward proper headers
-                res.setHeader('Content-Type', pdfRes.headers['content-type'] || 'application/pdf');
-                res.setHeader('Content-Disposition', 'inline; filename="document.pdf"');
-                res.setHeader('Cache-Control', 'public, max-age=3600');
-                res.setHeader('Access-Control-Allow-Origin', '*'); // optional for debugging
-
-                pdfRes.pipe(res);
-            }).on('error', (err) => {
-                console.error('Error fetching PDF:', err);
-                res.status(500).send('Error fetching PDF');
-            });
-
-        } catch (error) {
-            console.error('Invalid URL:', error);
-            return res.status(400).send('Invalid URL provided.');
-        }
-    };
-
 
     static getAllFoldersAndFiles: any = async (req: Request, res: Response) => {
         try {
@@ -127,6 +85,7 @@ export class documents {
             } else {
                 throw new Error("File is required")
             }
+            console.log("GOne>>>>>>>>>>>>>>>>>>>> ")
             const response = await axios.post(`${envConfig.aiBackendUrl}/upload-and-ingest`, formData, {
                 headers: {
                     ...formData.getHeaders()

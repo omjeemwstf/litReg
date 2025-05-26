@@ -59,12 +59,12 @@ export const setsRelations = relations(sets, ({ one, many }) => ({
         references: [users.id],
     }),
     files: many(setsToFolders),
-    query: many(query)
+    queries: many(query)
 }));
 
 export const queryRelations = relations(query, ({ one }) => ({
-    sets: one(sets, {
-        fields: [query.queryId],
+    set: one(sets, {
+        fields: [query.setId],
         references: [sets.id]
     })
 }))

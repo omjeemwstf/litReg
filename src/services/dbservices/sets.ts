@@ -22,7 +22,7 @@ export class set {
         const userSets = await postgreDb.query.sets.findFirst({
             where: and(eq(sets.userId, userId), eq(sets.setId, setId)),
             columns: {
-                id: true,
+                setId: true,
                 name: true,
                 purpose: true,
                 createdAt: true
@@ -107,12 +107,19 @@ export class set {
         const queryData = await postgreDb.query.sets.findFirst({
             where: and(eq(sets.setId, setId), eq(sets.userId, user.id)),
             with: {
-                query: {
-
+                queries: {
+                    columns: {
+                        queryId: true
+                    }
                 }
             }
-        })
 
+        })
+        let formatted = []
+        if (queryData?.queries) formatted = queryData.queries.map((q) => {
+            return q.queryId
+        })
+        return formatted
     }
 
 

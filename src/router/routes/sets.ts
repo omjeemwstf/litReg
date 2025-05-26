@@ -4,9 +4,9 @@ import controllers from "../../controllers"
 
 const setsRouter = express.Router()
 
-setsRouter.get("/query/:setId", authMiddleware, controllers.set.getAllSetQueries)
+setsRouter.get("/query/:setId", authMiddleware, controllers.set.getAllSetQueriesById)
 setsRouter.post("/query", authMiddleware, controllers.set.query)
-setsRouter.post("/query", authMiddleware, controllers.set.getAllSetQueries)
+// setsRouter.get("/query", authMiddleware, controllers.set.getAllSets)
 setsRouter.post("/", authMiddleware, controllers.set.createSet)
 setsRouter.post("/:id", authMiddleware, controllers.set.addFilesToSet)
 setsRouter.get("/", authMiddleware, controllers.set.getAllSets)
