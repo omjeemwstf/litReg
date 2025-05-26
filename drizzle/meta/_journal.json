@@ -43,6 +43,13 @@
       "when": 1748087725570,
       "tag": "0005_rapid_maggott",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1748258704063,
+      "tag": "0006_perpetual_infant_terrible",
+      "breakpoints": true
     }
   ]
 }

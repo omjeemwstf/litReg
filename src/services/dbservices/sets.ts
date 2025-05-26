@@ -3,7 +3,7 @@ import services from ".."
 import { generateRandomUUId } from "../../config/constants"
 import postgreDb from "../../config/db"
 import { ErrorTypes, throwError } from "../../config/error"
-import { sets, setsToFolders } from "../../models/schema";
+import { query, sets, setsToFolders, users } from "../../models/schema";
 import { FolderObjectType } from "../../types/user";
 
 
@@ -17,6 +17,105 @@ export class set {
             }
         })
     }
+
+    static getSetFilesDataBySetId = async (setId: string, userId: number) => {
+        const userSets = await postgreDb.query.sets.findFirst({
+            where: and(eq(sets.userId, userId), eq(sets.setId, setId)),
+            columns: {
+                id: true,
+                name: true,
+                purpose: true,
+                createdAt: true
+            },
+            with: {
+                files: {
+                    columns: {
+                        fileId: true
+                    },
+                    with: {
+                        folder: {
+                            columns: {
+                                name: true,
+                                link: true,
+                                meta: true
+                            }
+                        }
+                    }
+                },
+            }
+        })
+        if (!userSets) {
+            throw new Error("This set either not exists or not belongs to you")
+        }
+        return userSets;
+    }
+
+    static getSetFilesIdBySetId = async (setId: string, userId: number) => {
+        const userSets = await postgreDb.query.sets.findFirst({
+            where: and(eq(sets.userId, userId), eq(sets.setId, setId)),
+            columns: {
+                id: true,
+                name: true,
+                purpose: true,
+                createdAt: true
+            },
+            with: {
+                files: {
+                    columns: {
+                        fileId: true
+                    },
+                }
+            }
+        })
+        if (!userSets) {
+            throw new Error("This set either not exists or not belongs to you")
+        }
+        const files = this.fomrmatFiles([userSets])[0].files
+        return { files, id: userSets.id };
+    }
+
+    static getSetDataByIntegerSetData = async (setId: string) => {
+        return await postgreDb.query.sets.findFirst({
+            where: eq(sets.setId, setId),
+            columns: {
+                id: true
+            }
+        })
+    }
+
+    static saveQueryId = async (setId: number, queryId: string) => {
+        try {
+            const data = await postgreDb.insert(query).values({
+                setId: setId,
+                queryId: queryId
+            }).returning()
+            console.log("Query saved", data)
+        } catch (error) {
+            if (error.code === "23505") {
+                throw new Error("Set with this query is already exists")
+            }
+            throw new Error("Error while adding query")
+        }
+
+    }
+
+    static getAllSetsQueryById = async (setId: string, userId: string) => {
+        const user = await services.user.getUserById(userId)
+        if (!user) {
+            throwError(ErrorTypes.USER_NOT_FOUND)
+        }
+        const queryData = await postgreDb.query.sets.findFirst({
+            where: and(eq(sets.setId, setId), eq(sets.userId, user.id)),
+            with: {
+                query: {
+
+                }
+            }
+        })
+
+    }
+
+
 
     static getAllUserSets = async (userId: string) => {
         const user = await services.user.getUserById(userId)
@@ -41,7 +140,7 @@ export class set {
                                 name: true, // this is your 'title'
                                 // type: true,
                                 link: true,
-                                meta : true
+                                meta: true
                             }
                         }
                     }

@@ -38,6 +38,13 @@ export const sets = pgTable("sets", {
     isDeleted: boolean().default(false)
 });
 
+export const query: any = pgTable("query", {
+    id: serial().primaryKey(),
+    setId: integer().notNull().references(() => sets.id),
+    queryId: varchar().unique(),
+    createdAt: timestamp().defaultNow()
+})
+
 export const setsToFolders = pgTable("setsToFolders",
     {
         setId: integer().notNull().references(() => sets.id),
@@ -52,7 +59,15 @@ export const setsRelations = relations(sets, ({ one, many }) => ({
         references: [users.id],
     }),
     files: many(setsToFolders),
+    query: many(query)
 }));
+
+export const queryRelations = relations(query, ({ one }) => ({
+    sets: one(sets, {
+        fields: [query.queryId],
+        references: [sets.id]
+    })
+}))
 
 
 export const usersRelations = relations(users, ({ many }) => ({

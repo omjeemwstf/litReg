@@ -2,6 +2,9 @@ import { Request, Response } from "express"
 import services from "../../services"
 import { successResponse } from "../../config/response"
 import { ErrorTypes, handleError, throwError } from "../../config/error"
+import { generateRandomUUId } from "../../config/constants"
+import axios from "axios"
+import { envConfig } from "../../config/envConfigs"
 
 export class set {
 
@@ -45,6 +48,64 @@ export class set {
             const userId = req["user"]["userId"]
             const response = await services.set.getAllUserSets(userId)
             return successResponse(res, 200, "All User Sets Fetched Successfully", response)
+        } catch (error) {
+            return handleError(res, error)
+        }
+    }
+
+    static query: any = async (req: Request, res: Response) => {
+        try {
+            const userId = req["user"]["userId"]
+            const { setId, query } = req.body
+            if (!setId || !query) {
+                throw new Error("SetId and query is required")
+            }
+            const user = await services.user.getUserById(userId)
+            if (!user) {
+                throwError(ErrorTypes.USER_NOT_FOUND)
+            }
+            const { files, id } = await services.set.getSetFilesIdBySetId(setId, user.id)
+            console.log("Files atre>>> ", files)
+            const aiData = await axios.post(`${envConfig.aiBackendUrl}/query`, {
+                // doc_ids: ["683416c0a9defae32f81717e", "683416c2a9defae32f81717f"],
+                doc_ids: files,
+                query
+            })
+            const responseData = aiData.data
+            console.log("response data is >>>>> ", responseData)
+            await services.set.saveQueryId(id, responseData.id)
+            return successResponse(res, 200, "Query Data", responseData)
+        } catch (error) {
+            return handleError(res, error)
+        }
+    }
+
+    static getAllSetQueries: any = async (req: Request, res: Response) => {
+        try {
+            const userId = req["user"]["userId"]
+            const setId = req.params.setId
+
+            if (!setId) {
+                throw new Error("Set Id is required")
+            }
+        } catch (error) {
+            return handleError(res, error)
+        }
+    }
+
+    static getSetById: any = async (req: Request, res: Response) => {
+        try {
+            const userId = req["user"]["userId"]
+            const setId = String(req.params.setId)
+            if (!setId) {
+                throw new Error("Set Id is required")
+            }
+            const user = await services.user.getUserById(userId)
+            if (!user) {
+                throwError(ErrorTypes.USER_NOT_FOUND)
+            }
+            const setsData = await services.set.getSetFilesDataBySetId(setId, user.id)
+            return successResponse(res, 200, "Sets Details fetched successfully!", setsData)
         } catch (error) {
             return handleError(res, error)
         }
