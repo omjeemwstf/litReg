@@ -55,6 +55,7 @@ export class set {
 
     static query: any = async (req: Request, res: Response) => {
         try {
+            console.log("Request hit >>>> ")
             const userId = req["user"]["userId"]
             const { setId, query } = req.body
             if (!setId || !query) {
@@ -64,14 +65,15 @@ export class set {
             if (!user) {
                 throwError(ErrorTypes.USER_NOT_FOUND)
             }
-            const { files, id } = await services.set.getSetFilesIdBySetId(setId, user.id)
-            console.log("Files atre>>> ", files)
+            const { files, id, links } = await services.set.getSetFilesIdBySetId(setId, user.id)
+            console.log("Files atre>>> ", files, links)
             const aiData = await axios.post(`${envConfig.aiBackendUrl}/query`, {
                 // doc_ids: ["683416c0a9defae32f81717e", "683416c2a9defae32f81717f"],
                 doc_ids: files,
                 query
             })
             const responseData = aiData.data
+            responseData.links = links
             console.log("response data is >>>>> ", responseData)
             await services.set.saveQueryId(id, responseData.id)
             return successResponse(res, 200, "Query Data", responseData)
@@ -88,12 +90,20 @@ export class set {
             if (!setId) {
                 throw new Error("Set Id is required")
             }
-            const data = await services.set.getAllSetsQueryById(setId, userId)
-            console.log("Data query set s??? ", data)
+            const { formatted, links } = await services.set.getAllSetsQueryById(setId, userId)
+            console.log("Data query set s??? ", formatted, links)
             const response = await axios.post(`${envConfig.aiBackendUrl}/get-query`, {
-                doc_ids: data
+                doc_ids: formatted
             })
-            return successResponse(res, 200, "Sets Data", response.data)
+            console.log("Links are >>> ", links)
+            const responseData = response.data
+            responseData.links = links
+            const newData = {
+                query: responseData.query,
+                links: links
+            }
+            console.log("Response datra >>>> ", responseData)
+            return successResponse(res, 200, "Sets Data", newData)
         } catch (error) {
             return handleError(res, error)
         }

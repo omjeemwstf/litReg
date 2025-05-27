@@ -15,6 +15,21 @@ import { URL } from 'url';
 export class documents {
 
 
+    static getFileById: any = async (req: Request, res: Response) => {
+        try {
+            const userId = req["user"]["userId"]
+            const id = req.params.id
+            if (!id) {
+                throw new Error("File Id is required")
+            }
+            console.log("Id is >>> ", id)
+            const data = await services.documents.getFileDataById(id, userId)
+            console.log("Data ios ", data)
+            return successResponse(res, 200, "File Data Fetched Successfully", data)
+        } catch (error) {
+            return handleError(res, error)
+        }
+    }
 
 
 
@@ -26,6 +41,7 @@ export class documents {
                 throw new Error("User not exists")
             }
             const data = await services.documents.getALLUserFoldersAndFiles(integerUserId.id)
+            console.log("Data is ", data)
             return successResponse(res, 200, "All folders retrive successfully", data)
         } catch (error) {
             return handleError(res, error)

@@ -3,7 +3,7 @@ import services from ".."
 import { generateRandomUUId } from "../../config/constants"
 import postgreDb from "../../config/db"
 import { ErrorTypes, throwError } from "../../config/error"
-import { query, sets, setsToFolders, users } from "../../models/schema";
+import { folders, query, sets, setsToFolders, users } from "../../models/schema";
 import { FolderObjectType } from "../../types/user";
 
 
@@ -64,14 +64,36 @@ export class set {
                     columns: {
                         fileId: true
                     },
+                    with: {
+                        folder: {
+                            columns: {
+                                link: true,
+                                meta: true
+                            }
+                        }
+                    }
                 }
             }
         })
         if (!userSets) {
             throw new Error("This set either not exists or not belongs to you")
         }
+
+        let links = {}
+        if (userSets?.files) {
+            userSets.files.map((f: any) => {
+                if (f?.fileId) {
+                    let fileId = f.fileId
+                    let data = {
+                        link: f?.folder?.link,
+                        meta: f?.folder?.meta
+                    }
+                    links[fileId] = data
+                }
+            })
+        }
         const files = this.fomrmatFiles([userSets])[0].files
-        return { files, id: userSets.id };
+        return { files, id: userSets.id, links };
     }
 
     static getSetDataByIntegerSetData = async (setId: string) => {
@@ -111,15 +133,43 @@ export class set {
                     columns: {
                         queryId: true
                     }
+                },
+                files: {
+                    columns: {
+                        fileId: true
+                    },
+                    with: {
+                        folder: {
+                            columns: {
+                                link: true,
+                                meta: true
+                            }
+                        }
+                    }
                 }
             }
 
         })
+        console.log("Query data >>>>>>>>>>>>>>> ", queryData)
+        let links = {}
+        if (queryData?.files) {
+            queryData.files.map((f: any) => {
+                if (f?.fileId) {
+                    let fileId = f.fileId
+                    let data = {
+                        link: f?.folder?.link,
+                        meta: f?.folder?.meta
+                    }
+                    links[fileId] = data
+                }
+            })
+        }
+        console.log("Links are >>> ", links)
         let formatted = []
         if (queryData?.queries) formatted = queryData.queries.map((q) => {
             return q.queryId
         })
-        return formatted
+        return { formatted, links }
     }
 
 

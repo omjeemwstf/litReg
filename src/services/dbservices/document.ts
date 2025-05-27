@@ -3,6 +3,8 @@ import postgreDb from "../../config/db";
 import { folders, sets, setsToFolders } from "../../models/schema";
 import { FolderObjectType } from "../../types/user";
 import { generateRandomUUId } from "../../config/constants";
+import services from "..";
+import { ErrorTypes, throwError } from "../../config/error";
 
 export class documents {
 
@@ -62,6 +64,24 @@ export class documents {
             })
         return addFiles;
     }
+
+    static getFileDataById = async (fileId: string, userId: string) => {
+        const user = await services.user.getUserById(userId)
+        if (!user) {
+            throwError(ErrorTypes.USER_NOT_FOUND)
+        }
+        const response = await postgreDb.query.folders.findFirst({
+            where: and(eq(folders.id, fileId), eq(folders.userId, user.id)),
+            columns: {
+                id: true,
+                type: true,
+                link: true,
+                meta: true
+            }
+        })
+        return response;
+    }
+
 
     static addFolder = async (
         folderName: string,
