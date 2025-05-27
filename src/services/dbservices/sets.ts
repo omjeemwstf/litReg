@@ -51,13 +51,14 @@ export class set {
     }
 
     static getSetFilesIdBySetId = async (setId: string, userId: number) => {
-        const userSets = await postgreDb.query.sets.findFirst({
+        const userSets: any = await postgreDb.query.sets.findFirst({
             where: and(eq(sets.userId, userId), eq(sets.setId, setId)),
             columns: {
                 id: true,
                 name: true,
                 purpose: true,
-                createdAt: true
+                createdAt: true,
+                version: true
             },
             with: {
                 files: {
@@ -93,7 +94,7 @@ export class set {
             })
         }
         const files = this.fomrmatFiles([userSets])[0].files
-        return { files, id: userSets.id, links };
+        return { files, id: userSets.id, links, version: userSets.version };
     }
 
     static getSetDataByIntegerSetData = async (setId: string) => {
@@ -105,11 +106,12 @@ export class set {
         })
     }
 
-    static saveQueryId = async (setId: number, queryId: string) => {
+    static saveQueryId = async (setId: number, queryId: string, version: number) => {
         try {
             const data = await postgreDb.insert(query).values({
                 setId: setId,
-                queryId: queryId
+                queryId: queryId,
+                version
             }).returning()
             console.log("Query saved", data)
         } catch (error) {
@@ -183,7 +185,8 @@ export class set {
                 setId: true,
                 name: true,
                 purpose: true,
-                createdAt: true
+                createdAt: true,
+                version: true
             },
             with: {
                 files: {
@@ -216,7 +219,8 @@ export class set {
                     id: true,
                     name: true,
                     purpose: true,
-                    createdAt: true
+                    createdAt: true,
+                    version: true
                 }
             })
             console.log("Is set belongs to user ", isSetBelongToUser)
@@ -238,27 +242,41 @@ export class set {
             if (filesId.length !== ownedFolders.length) {
                 throw new Error("Some folders are not valid for this user or not of type 'file'");
             }
+            const newVersion = isSetBelongToUser.version + 1
             const data = filesId.map(fileId => ({
                 setId: isSetBelongToUser.id,
-                fileId
+                fileId,
+                version: newVersion
             }))
             console.log("Data files ", data)
-            const files = await postgreDb
-                .insert(setsToFolders)
-                .values(data)
-                .returning({
-                    fileId: setsToFolders.fileId
-                });
+            return await postgreDb.transaction(async (tx) => {
+                const files = await tx
+                    .insert(setsToFolders)
+                    .values(data)
+                    .returning({
+                        fileId: setsToFolders.fileId,
+                        version: setsToFolders.version
+                    });
 
-            console.log("Response is ", files)
-            const formattedData = {
-                setId,
-                name: isSetBelongToUser.name,
-                purpose: isSetBelongToUser.purpose,
-                createdAt: isSetBelongToUser.createdAt,
-                files: files.map((f) => f.fileId)
-            }
-            return formattedData
+                await tx.update(sets)
+                    .set({ version: newVersion })
+                    .where(eq(sets.setId, setId))
+                    .returning({
+                        version: sets.version
+                    })
+
+                console.log("Response is ", files)
+                const formattedData = {
+                    setId,
+                    name: isSetBelongToUser.name,
+                    purpose: isSetBelongToUser.purpose,
+                    version: newVersion,
+                    createdAt: isSetBelongToUser.createdAt,
+                    files: files.map((f) => f.fileId)
+                }
+                return formattedData
+            })
+
         } catch (error) {
             if (error.code === "23505") {
                 throw new Error("Some Files you included are already included in this set")

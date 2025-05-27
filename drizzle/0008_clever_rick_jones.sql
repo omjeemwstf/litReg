@@ -1,0 +1,1 @@
+ALTER TABLE "setsToFolders" ADD COLUMN "createdAt" timestamp DEFAULT now();

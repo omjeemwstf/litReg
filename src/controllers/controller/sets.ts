@@ -65,17 +65,17 @@ export class set {
             if (!user) {
                 throwError(ErrorTypes.USER_NOT_FOUND)
             }
-            const { files, id, links } = await services.set.getSetFilesIdBySetId(setId, user.id)
-            console.log("Files atre>>> ", files, links)
+            const { files, id, links, version } = await services.set.getSetFilesIdBySetId(setId, user.id)
+            console.log("Files atre>>> ", files, links, version)
             const aiData = await axios.post(`${envConfig.aiBackendUrl}/query`, {
-                // doc_ids: ["683416c0a9defae32f81717e", "683416c2a9defae32f81717f"],
                 doc_ids: files,
-                query
+                query,
+                version
             })
             const responseData = aiData.data
             responseData.links = links
             console.log("response data is >>>>> ", responseData)
-            await services.set.saveQueryId(id, responseData.id)
+            await services.set.saveQueryId(id, responseData.id, version)
             return successResponse(res, 200, "Query Data", responseData)
         } catch (error) {
             return handleError(res, error)

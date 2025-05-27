@@ -6,6 +6,7 @@ import { upload } from "../../config/multer";
 const documentsRouter = express.Router()
 
 
+documentsRouter.delete("/:id", authMiddleware, controllers.documents.deleteFolderOrFile)
 documentsRouter.get("/file/:id", authMiddleware, controllers.documents.getFileById)
 documentsRouter.get("/folders", authMiddleware, controllers.documents.getAllFoldersAndFiles)
 documentsRouter.post("/folders", authMiddleware, controllers.documents.uploadFolder)

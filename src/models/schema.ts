@@ -28,11 +28,12 @@ export const folders = pgTable("folders", {
     isDeleted: boolean().default(false)
 });
 
-export const sets = pgTable("sets", {
+export const sets: any = pgTable("sets", {
     id: serial().primaryKey(),
     setId: varchar().unique().notNull(),
     name: varchar().notNull(),
     purpose: varchar().notNull(),
+    version: integer().default(0),
     userId: integer().notNull().references(() => users.id),
     createdAt: timestamp().defaultNow(),
     isDeleted: boolean().default(false)
@@ -42,6 +43,7 @@ export const query: any = pgTable("query", {
     id: serial().primaryKey(),
     setId: integer().notNull().references(() => sets.id),
     queryId: varchar().unique(),
+    version: integer().default(0),
     createdAt: timestamp().defaultNow()
 })
 
@@ -49,6 +51,8 @@ export const setsToFolders = pgTable("setsToFolders",
     {
         setId: integer().notNull().references(() => sets.id),
         fileId: varchar().notNull().references(() => folders.id),
+        version: integer().default(0),
+        createdAt : timestamp().defaultNow()
     },
     (table) => [primaryKey({ columns: [table.setId, table.fileId] })]
 );

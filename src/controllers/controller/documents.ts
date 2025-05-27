@@ -31,6 +31,28 @@ export class documents {
         }
     }
 
+    static deleteFolderOrFile: any = async (req: Request, res: Response) => {
+        try {
+            const userId = req["user"]["userId"]
+            const fileId = req.params.id
+            if (!fileId) {
+                throw new Error("File Id is required")
+            }
+            const user = await services.user.getUserById(userId)
+            if (!user) {
+                throwError(ErrorTypes.USER_NOT_FOUND)
+            }
+            // const fileData = await services.documents.isFolderExists(fileId)
+            // if (!fileData) {
+            //     throw new Error("File not exists ")
+            // }
+            await services.documents.deleteFileOrFolder(fileId, user.id)
+            return successResponse(res, 200, "File deleted Successfully")
+        } catch (error) {
+            return handleError(res, error)
+        }
+    }
+
 
 
     static getAllFoldersAndFiles: any = async (req: Request, res: Response) => {

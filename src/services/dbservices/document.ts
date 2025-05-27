@@ -14,7 +14,7 @@ export class documents {
         })
         function buildTree(folderList: any, parentId: any) {
             return folderList
-                .filter((folder: any) => folder.parentId === parentId)
+                .filter((folder: any) => folder.parentId === parentId && !folder.isDeleted)
                 .map((folder: any) => ({
                     id: folder.id,
                     name: folder.name,
@@ -29,6 +29,19 @@ export class documents {
         const nestedFolders = buildTree(userFolders, null);
         return nestedFolders;
     }
+
+    static deleteFileOrFolder = async (fileId: string, userId: number) => {
+        return await postgreDb.transaction(async (tx) => {
+            const isSetBelongToUser = await tx.query.folders.findFirst({
+                where: and(eq(folders.id, fileId), eq(folders.userId, userId))
+            })
+            if (!isSetBelongToUser) {
+                throw new Error("Either set not exists or nor belongs to you ")
+            }
+            return await tx.update(folders).set({ isDeleted: true }).where(eq(folders.id, fileId))
+        })
+    }
+
 
 
     static isFolderExists = async (folderId: string) => {
