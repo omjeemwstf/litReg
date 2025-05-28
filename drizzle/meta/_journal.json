@@ -5,64 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1747896391518,
-      "tag": "0000_colossal_wolfsbane",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1748080083845,
-      "tag": "0001_tense_risque",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1748081604278,
-      "tag": "0002_friendly_masked_marvel",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1748082210623,
-      "tag": "0003_robust_tyrannus",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1748086342513,
-      "tag": "0004_happy_warbird",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1748087725570,
-      "tag": "0005_rapid_maggott",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1748258704063,
-      "tag": "0006_perpetual_infant_terrible",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1748350725890,
-      "tag": "0007_certain_komodo",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1748354954225,
-      "tag": "0008_clever_rick_jones",
+      "when": 1748433567882,
+      "tag": "0000_flashy_captain_britain",
       "breakpoints": true
     }
   ]

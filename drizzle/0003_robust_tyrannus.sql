@@ -1,1 +1,0 @@
-ALTER TABLE "sets" ALTER COLUMN "purpose" SET NOT NULL;
