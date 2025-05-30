@@ -34,16 +34,20 @@ export class documents {
     static updateFoldersId = async (data: { node_id: string, _id: string }[]) => {
         const updatedFolders = await Promise.all(
             data.map(async (d) => {
-                console.log("Data is >>>>>>> ", d);
-                const updated = await postgreDb
-                    .update(folders)
-                    .set({ id: d._id, isProcessed: true })
-                    .where(and(eq(folders.id, d.node_id), eq(folders.type, FolderObjectType.FILE)))
-                    .returning({
-                        id: folders.id
-                    });
-                console.log("Updated is >>>>> ", updated);
-                return updated[0];
+                try {
+                    console.log("Data is >>>>>>> ", d);
+                    const updated = await postgreDb
+                        .update(folders)
+                        .set({ id: d._id, isProcessed: true })
+                        .where(and(eq(folders.id, d.node_id), eq(folders.type, FolderObjectType.FILE)))
+                        .returning({
+                            id: folders.id
+                        });
+                    console.log("Updated is >>>>> ", updated);
+                    return updated[0];
+                } catch (error) {
+                    console.log("Error While updating >>>>>> ", error, "Object is >>>> ", d)
+                }
             })
         );
 
@@ -118,7 +122,6 @@ export class documents {
     static addFiles = async (
         files: FolderModal[]
     ) => {
-        console.log("Add files data is ", files)
         const addFiles = await postgreDb
             .insert(folders)
             .values(files)
@@ -187,5 +190,22 @@ export class documents {
         if (!response) {
             throw new Error("This Folder is not belongs to this user")
         }
+    }
+
+    static reprocessTheFiles = async () => {
+        return await postgreDb.query.folders.findMany({
+            where: and(
+                eq(folders.type, FolderObjectType.FILE),
+                eq(folders.isProcessed, false),
+                // eq(folders.userId, 18),
+                eq(folders.isDeleted, false)
+            ),
+            // limit: 10,
+            columns: {
+                id: true,
+                link: true,
+                meta: true
+            }
+        })
     }
 }

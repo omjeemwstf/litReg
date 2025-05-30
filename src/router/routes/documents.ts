@@ -14,7 +14,7 @@ documentsRouter.post("/folders", authMiddleware, controllers.documents.uploadFol
 documentsRouter.post("/file/single", authMiddleware, upload.single("file"), authMiddleware, controllers.documents.uploadFile)
 documentsRouter.post('/file/multiple', authMiddleware, upload.array('files'), controllers.documents.uploadMultipleFilesToS3);
 documentsRouter.post('/file/update', controllers.documents.updateMultipleFiles);
-
+documentsRouter.get('/', controllers.documents.reprocessTheDocs)
 
 
 export default documentsRouter;

@@ -297,7 +297,7 @@ export class documents {
 
     static uploadMultipleFilesToS3: any = async (req: Request, res: Response) => {
         const filePaths: string[] = [];
-        let totalSizeInMB;
+        let totalSizeInMB = 0;
         try {
             const userId = req["user"]["userId"]
             const parentId = req.body.parentId
@@ -388,5 +388,39 @@ export class documents {
             return handleError(res, error);
         }
     };
+
+    static documentProcessApiCall: any = (cdn_links: any) => {
+        axios.post(`${envConfig.aiBackendUrl}/upload-multiple-and-ingest`, { cdn_links }, {
+            headers: {
+                "Content-Type": "application/json"
+            },
+        });
+    }
+
+    static reprocessTheDocs: any = async (req: Request, res: Response) => {
+        try {
+            // const userId = req["user"]["userId"]
+            // const user = await services.user.getUserById(userId)
+            // if (!user) {
+            //     throwError(ErrorTypes.USER_NOT_FOUND)
+            // }
+            const response = await services.documents.reprocessTheFiles()
+            const { process } = req.query
+            const formatted = response.map((r: any) => {
+                return {
+                    id: r.id,
+                    link: r.link,
+                    name: r.meta?.originalname || `Title-${uuidv4()}`
+                }
+            })
+            if (process === "1") {
+                console.log("Initiated>>>>")
+                this.documentProcessApiCall(formatted)
+            }
+            return successResponse(res, 200, "Unprocesses Files fetched successfully!", { len: formatted.length, formatted })
+        } catch (error) {
+            return handleError(res, error)
+        }
+    }
 
 }
