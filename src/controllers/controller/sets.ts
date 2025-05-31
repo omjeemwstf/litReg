@@ -5,21 +5,31 @@ import { ErrorTypes, handleError, throwError } from "../../config/error"
 import { generateRandomUUId } from "../../config/constants"
 import axios from "axios"
 import { envConfig } from "../../config/envConfigs"
+import { SetType } from "../../types/user"
 
 export class set {
 
     static createSet: any = async (req: Request, res: Response) => {
         try {
-            const { name, purpose, ids } = req.body
+            const { name, purpose, ids, type } = req.body
+            const setType = type || SetType.QUERY
             const userId = req["user"]["userId"]
-            if (!name || !purpose || !ids) {
-                throw new Error("Name. Ids of Files and Purpose are required for creating the set")
+            if (
+                !name ||
+                !purpose ||
+                !ids
+            ) {
+                throw new Error("Name, Ids of Files, and Purpose are required for creating the set");
+            }
+            if (!setType || !(setType === SetType.LLM || setType === SetType.QUERY)) {
+                throw new Error(`Set type can be only '${SetType.LLM}' or '${SetType.QUERY}'`)
             }
 
             if (!Array.isArray(ids) || !ids.every(id => typeof id === 'string')) {
                 throw new Error('Ids must be an array of strings.')
             }
-            const response = await services.set.createSet(userId, name, purpose, ids)
+            const response = await services.set.createSet(userId, name, purpose, ids, setType)
+            console.log("Set created >>> ", response)
             return successResponse(res, 200, "Set created Successfully", response)
         } catch (error) {
             return handleError(res, error)
@@ -71,11 +81,16 @@ export class set {
     static getAllSets: any = async (req: Request, res: Response) => {
         try {
             const userId = req["user"]["userId"]
+            const type = req.query.type || SetType.QUERY
+            if (!type || !(type === SetType.LLM || type === SetType.QUERY)) {
+                throw new Error(`Set type can be only '${SetType.LLM}' or '${SetType.QUERY}'`)
+            }
             const user = await services.user.getUserById(userId)
             if (!user) {
                 throwError(ErrorTypes.USER_NOT_FOUND)
             }
-            const response = await services.set.getAllUserSets(user.id)
+            const response = await services.set.getAllUserSets(user.id, type)
+            console.log("Set get success")
             return successResponse(res, 200, "All User Sets Fetched Successfully", response)
         } catch (error) {
             return handleError(res, error)

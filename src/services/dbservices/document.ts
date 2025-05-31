@@ -1,6 +1,6 @@
 import { and, eq, inArray } from "drizzle-orm";
 import postgreDb from "../../config/db";
-import { FolderModal, folders, sets, setsToFolders } from "../../models/schema";
+import { FolderModal, folders, instructionSheet, sets, setsToFolders } from "../../models/schema";
 import { FolderObjectType } from "../../types/user";
 import { generateRandomUUId } from "../../config/constants";
 import services from "..";
@@ -207,5 +207,23 @@ export class documents {
                 meta: true
             }
         })
+    }
+
+    static createInstructionSheet = async (userId: number, setId: number, link: string, meta: any) => {
+        console.log("User id >> ", userId, "set id ", setId, "link", link, "meta", meta)
+        const sheetId = generateRandomUUId().toString()
+        return await postgreDb
+            .insert(instructionSheet)
+            .values({
+                sheetId,
+                userId,
+                setId,
+                link,
+                meta
+            })
+            .returning({
+                id: instructionSheet.sheetId,
+                link: instructionSheet.link
+            })
     }
 }

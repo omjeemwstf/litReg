@@ -300,7 +300,7 @@ export class documents {
         let totalSizeInMB = 0;
         try {
             const userId = req["user"]["userId"]
-            const parentId = req.body.parentId
+            const parentId = req.body.parentId || null
             const integerUserId = await this.validateUserAndFolder(userId, parentId)
 
 
@@ -379,6 +379,7 @@ export class documents {
                     "Content-Type": "application/json"
                 },
             });
+            // this.documentProcessApiCall(cdn_links)
             // console.log("Kate reponse is ", response)
             this.deleteFilePaths(filePaths)
             return successResponse(res, 200, "File Uploaded Successfully!", responseData);
@@ -388,6 +389,67 @@ export class documents {
             return handleError(res, error);
         }
     };
+
+    static uploadInstructionSheet: any = async (req: Request, res: Response) => {
+        const excelFile = req["file"]
+        const filePath = excelFile.path
+        try {
+            const allowedExtensions = ['.xlsx'];
+            const ext = path.extname(excelFile.originalname).toLowerCase()
+            if (!allowedExtensions.includes(ext)) {
+                throw new Error(`Only ${allowedExtensions.join(" ")} file types are allowed`)
+            }
+            const userId = req["user"]["userId"]
+            const user = await services.user.getUserById(userId)
+            const setId = String(req.params.setId)
+            if (!user) {
+                throwError(ErrorTypes.USER_NOT_FOUND)
+            }
+            if (!setId) {
+                throw new Error("Set Id is required")
+            }
+            const isSetBelongsToUser = await services.set.isSetBelongsToUser(setId, user.id)
+            if (!isSetBelongsToUser) {
+                throw new Error("Either set not exists or not belongs to you")
+            }
+            const fileContent = fs.readFileSync(filePath)
+
+            const uniqueKey = `${uuidv4()}-${excelFile.originalname}`;
+
+            const params = {
+                Bucket: envConfig.uploader.bucket,
+                Key: uniqueKey,
+                Body: fileContent,
+                ContentType: excelFile.mimetype,
+                ACL: 'public-read',
+            };
+
+            const meta = {
+                originalname: excelFile.originalname,
+                mimetype: excelFile.mimetype,
+                size: excelFile.size,
+            };
+            let link = "";
+
+            await s3.upload(params).promise().then((result) => {
+                console.log("Upload result is >>>> ", result)
+                link = result.Location
+            });
+
+            const response = await services.documents.createInstructionSheet(user.id, isSetBelongsToUser.id, link, meta)
+            console.log("Response is >>> ", response)
+
+            const saveDataToAi = await axios.post(`${envConfig.aiBackendUrl}/upload-excel`, {
+                link: response[0].link,
+                inst_id: response[0].id
+            })
+            this.deleteFilePaths([filePath])
+            return successResponse(res, 200, "Sheet Uploaded Successfully", { inst_data : saveDataToAi.data })
+        } catch (error) {
+            this.deleteFilePaths([filePath])
+            return handleError(res, error)
+        }
+    }
 
     static documentProcessApiCall: any = (cdn_links: any) => {
         axios.post(`${envConfig.aiBackendUrl}/upload-multiple-and-ingest`, { cdn_links }, {
@@ -422,5 +484,8 @@ export class documents {
             return handleError(res, error)
         }
     }
+
+
+
 
 }

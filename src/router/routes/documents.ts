@@ -13,6 +13,7 @@ documentsRouter.get("/folders", authMiddleware, controllers.documents.getAllFold
 documentsRouter.post("/folders", authMiddleware, controllers.documents.uploadFolder)
 documentsRouter.post("/file/single", authMiddleware, upload.single("file"), authMiddleware, controllers.documents.uploadFile)
 documentsRouter.post('/file/multiple', authMiddleware, upload.array('files'), controllers.documents.uploadMultipleFilesToS3);
+documentsRouter.post("/file/excel/:setId", authMiddleware, upload.single("file"), controllers.documents.uploadInstructionSheet)
 documentsRouter.post('/file/update', controllers.documents.updateMultipleFiles);
 documentsRouter.get('/', controllers.documents.reprocessTheDocs)
 

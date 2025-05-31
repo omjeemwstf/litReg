@@ -1,0 +1,1 @@
+ALTER TABLE "sets" ADD COLUMN "type" varchar DEFAULT 'query';

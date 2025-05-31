@@ -1,6 +1,6 @@
 {
-  "id": "2fe84f81-2a9b-4225-9fdb-0dee860415de",
-  "prevId": "a4d904cb-5cc2-4826-b1e2-74f367a8f26c",
+  "id": "6e59cdba-ddce-483d-b590-f73cdfb2f8c2",
+  "prevId": "1ec4e4aa-91be-4e69-a679-11d9e3510a51",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -107,6 +107,104 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.instructionSheet": {
+      "name": "instructionSheet",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "sheetId": {
+          "name": "sheetId",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "link": {
+          "name": "link",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "meta": {
+          "name": "meta",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "userId": {
+          "name": "userId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "setId": {
+          "name": "setId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "isDeleted": {
+          "name": "isDeleted",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "instructionSheet_userId_users_id_fk": {
+          "name": "instructionSheet_userId_users_id_fk",
+          "tableFrom": "instructionSheet",
+          "tableTo": "users",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "instructionSheet_setId_sets_id_fk": {
+          "name": "instructionSheet_setId_sets_id_fk",
+          "tableFrom": "instructionSheet",
+          "tableTo": "sets",
+          "columnsFrom": [
+            "setId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "instructionSheet_sheetId_unique": {
+          "name": "instructionSheet_sheetId_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "sheetId"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.query": {
       "name": "query",
       "schema": "",
@@ -195,6 +293,13 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'query'"
         },
         "purpose": {
           "name": "purpose",

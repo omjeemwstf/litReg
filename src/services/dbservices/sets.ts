@@ -4,7 +4,7 @@ import { generateRandomUUId } from "../../config/constants"
 import postgreDb from "../../config/db"
 import { ErrorTypes, throwError } from "../../config/error"
 import { folders, query, sets, setsToFolders, users } from "../../models/schema";
-import { FolderObjectType } from "../../types/user";
+import { FolderObjectType, SetType } from "../../types/user";
 
 
 export class set {
@@ -14,6 +14,16 @@ export class set {
             return {
                 ...file,
                 files: file?.files?.map((f: any) => f.fileId)
+            }
+        })
+    }
+
+    static isSetBelongsToUser = async (setId: string, userId: number) => {
+        console.log("Set id >>> ", setId, "user id >> ", userId)
+        return await postgreDb.query.sets.findFirst({
+            where: and(eq(sets.setId, setId), eq(sets.userId, userId), eq(sets.isDeleted, false)),
+            columns: {
+                id: true
             }
         })
     }
@@ -227,14 +237,15 @@ export class set {
 
 
 
-    static getAllUserSets = async (userId: number) => {
+    static getAllUserSets = async (userId: number, type: SetType) => {
         let response = await postgreDb.query.sets.findMany({
-            where: and(eq(sets.userId, userId), eq(sets.isDeleted, false)),
+            where: and(eq(sets.userId, userId), eq(sets.isDeleted, false), eq(sets.type, type)),
             columns: {
                 setId: true,
                 name: true,
                 purpose: true,
                 createdAt: true,
+                type: true
             },
             with: {
                 files: {
@@ -272,6 +283,7 @@ export class set {
                     name: true,
                     purpose: true,
                     createdAt: true,
+                    type: true
                 }
             })
             console.log("Is set belongs to user ", isSetBelongToUser)
@@ -364,6 +376,7 @@ export class set {
                     name: isSetBelongToUser.name,
                     purpose: isSetBelongToUser.purpose,
                     createdAt: isSetBelongToUser.createdAt,
+                    type : isSetBelongToUser.type,
                     files: [...filesIdToAddInSet, ...deleteRecoverSet]
                 }
                 return formattedData
@@ -378,7 +391,7 @@ export class set {
         }
     }
 
-    static createSet = async (userId: string, name: string, purpose: string, filesId: string[]) => {
+    static createSet = async (userId: string, name: string, purpose: string, filesId: string[], type: SetType) => {
 
         return await postgreDb.transaction(async (tx) => {
             const user = await services.user.getUserById(userId)
@@ -392,10 +405,12 @@ export class set {
                     setId: newSetId,
                     userId: user.id,
                     name,
-                    purpose
+                    purpose,
+                    type
                 }).returning({
                     id: sets.id,
-                    setId: sets.id
+                    setId: sets.id,
+                    type: sets.type
                 })
             console.log("Created set is ", set)
             return await this.addFilesIntoSets(user.id, newSetId, filesId)

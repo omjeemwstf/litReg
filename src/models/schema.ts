@@ -33,6 +33,7 @@ export const sets: any = pgTable("sets", {
     id: serial().primaryKey(),
     setId: varchar().unique().notNull(),
     name: varchar().notNull(),
+    type : varchar().default("query"),
     purpose: varchar().notNull(),
     userId: integer().notNull().references(() => users.id),
     createdAt: timestamp().defaultNow(),
@@ -57,13 +58,36 @@ export const setsToFolders: any = pgTable("setsToFolders",
     (table) => [primaryKey({ columns: [table.setId, table.fileId] })]
 );
 
+export const instructionSheet: any = pgTable("instructionSheet", {
+    id: serial().primaryKey(),
+    sheetId: varchar().unique(),
+    link: varchar(),
+    meta: jsonb(),
+    userId: integer().notNull().references(() => users.id),
+    setId: integer().notNull().references(() => sets.id),
+    isDeleted: boolean().default(false),
+    createdAt: timestamp().defaultNow()
+})
+
+export const instructionSheetRelations = relations(instructionSheet, ({ one }) => ({
+    user: one(users, {
+        fields: [instructionSheet.id],
+        references: [users.id]
+    }),
+    set: one(sets, {
+        fields: [instructionSheet.id],
+        references: [sets.id]
+    })
+}))
+
 export const setsRelations = relations(sets, ({ one, many }) => ({
     user: one(users, {
         fields: [sets.userId],
         references: [users.id],
     }),
     files: many(setsToFolders),
-    queries: many(query)
+    queries: many(query),
+    sheet: many(instructionSheet)
 }));
 
 export const queryRelations = relations(query, ({ one }) => ({
@@ -76,7 +100,8 @@ export const queryRelations = relations(query, ({ one }) => ({
 
 export const usersRelations = relations(users, ({ many }) => ({
     folders: many(folders),
-    sets: many(sets)
+    sets: many(sets),
+    sheet: many(instructionSheet)
 }));
 
 export const foldersRelations = relations(folders, ({ one, many }) => ({

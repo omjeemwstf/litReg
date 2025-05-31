@@ -3,6 +3,11 @@ export enum FolderObjectType {
     FILE = "FILE"
 }
 
+export enum SetType {
+    QUERY = "query",
+    LLM = "llm"
+}
+
 export interface NestedDocumentsInterface {
     id: string,
     name: string,
