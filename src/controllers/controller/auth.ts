@@ -44,7 +44,6 @@ export class auth {
                 { email, password, userName },
                 SIgnINMethod.PASSWORD
             );
-            console.log("Unverfihvbjkndl>>>>>>>>>>>>> ", user)
             if (user) this.setCookie(res, user.token)
             return successResponse(res, 200, "User registered Successfully, Please verify youe email", user)
         } catch (error) {

@@ -13,7 +13,7 @@ export class set {
         try {
             const { name, purpose, ids, type } = req.body
             const setType = type || SetType.QUERY
-            const userId = req["user"]["userId"]
+            const userId = req["userId"]
             if (
                 !name ||
                 !purpose ||
@@ -38,16 +38,12 @@ export class set {
 
     static deleteSet: any = async (req: Request, res: Response) => {
         try {
-            const userId = req["user"]["userId"]
+            const userId = req["userId"]
             const setId = req.params.setId
             if (!setId) {
                 throw new Error("Set Id is required")
             }
-            const user = await services.user.getUserById(userId)
-            if (!user) {
-                throwError(ErrorTypes.USER_NOT_FOUND)
-            }
-            const response = await services.set.deleteSet(setId, user.id)
+            const response = await services.set.deleteSet(setId, userId)
             if (!response || response.length === 0) {
                 throw new Error("Either set not exists or not belongs to you")
             }
@@ -59,7 +55,7 @@ export class set {
 
     static addFilesToSet: any = async (req: Request, res: Response) => {
         try {
-            const userId = req["user"]["userId"]
+            const userId = req["userId"]
             const { ids } = req.body
             if (
                 !Array.isArray(ids) ||
@@ -69,9 +65,7 @@ export class set {
                 throw new Error('Ids must be an array of unique strings.')
             }
             const id = req.params.id
-            const user = await services.user.getUserById(userId)
-            if (!user) throwError(ErrorTypes.USER_NOT_FOUND)
-            const response = await services.set.addFilesIntoSets(user.id, id, ids)
+            const response = await services.set.addFilesIntoSets(userId, id, ids)
             return successResponse(res, 200, "New Files are successfully added to the set", response)
         } catch (error) {
             return handleError(res, error)
@@ -80,17 +74,12 @@ export class set {
 
     static getAllSets: any = async (req: Request, res: Response) => {
         try {
-            const userId = req["user"]["userId"]
+            const userId = req["userId"]
             const type = req.query.type || SetType.QUERY
             if (!type || !(type === SetType.LLM || type === SetType.QUERY)) {
                 throw new Error(`Set type can be only '${SetType.LLM}' or '${SetType.QUERY}'`)
             }
-            const user = await services.user.getUserById(userId)
-            if (!user) {
-                throwError(ErrorTypes.USER_NOT_FOUND)
-            }
-            const response = await services.set.getAllUserSets(user.id, type)
-            console.log("Set get success")
+            const response = await services.set.getAllUserSets(userId, type)
             return successResponse(res, 200, "All User Sets Fetched Successfully", response)
         } catch (error) {
             return handleError(res, error)
@@ -99,17 +88,12 @@ export class set {
 
     static query: any = async (req: Request, res: Response) => {
         try {
-            console.log("Request hit >>>> ")
-            const userId = req["user"]["userId"]
+            const userId = req["userId"]
             const { setId, query } = req.body
             if (!setId || !query) {
                 throw new Error("SetId and query is required")
             }
-            const user = await services.user.getUserById(userId)
-            if (!user) {
-                throwError(ErrorTypes.USER_NOT_FOUND)
-            }
-            const { files, id, links } = await services.set.getSetFilesIdBySetId(setId, user.id)
+            const { files, id, links } = await services.set.getSetFilesIdBySetId(setId, userId)
             console.log("Files atre>>> ", files, links)
             const aiData = await axios.post(`${envConfig.aiBackendUrl}/query`, {
                 doc_ids: files,
@@ -127,7 +111,7 @@ export class set {
 
     static getAllSetQueriesById: any = async (req: Request, res: Response) => {
         try {
-            const userId = req["user"]["userId"]
+            const userId = req["userId"]
             const setId = req.params.setId
             console.log("Set id is ", setId)
             if (!setId) {
@@ -154,16 +138,12 @@ export class set {
 
     static getSetById: any = async (req: Request, res: Response) => {
         try {
-            const userId = req["user"]["userId"]
+            const userId = req["userId"]
             const setId = String(req.params.setId)
             if (!setId) {
                 throw new Error("Set Id is required")
             }
-            const user = await services.user.getUserById(userId)
-            if (!user) {
-                throwError(ErrorTypes.USER_NOT_FOUND)
-            }
-            const setsData = await services.set.getSetFilesDataBySetId(setId, user.id)
+            const setsData = await services.set.getSetFilesDataBySetId(setId, userId)
             return successResponse(res, 200, "Sets Details fetched successfully!", setsData)
         } catch (error) {
             return handleError(res, error)
@@ -172,18 +152,14 @@ export class set {
 
     static deleteFileFromSet: any = async (req: Request, res: Response) => {
         try {
-            const userId = req["user"]["userId"]
+            const userId = req["userId"]
             const setId = req.params.setId
             const fileId = req.params.fileId
 
             if (!setId || !fileId) {
                 throw new Error("Set id and File Id is required")
             }
-            const user = await services.user.getUserById(userId)
-            if (!user) {
-                throwError(ErrorTypes.USER_NOT_FOUND)
-            }
-            const isSetBelongToUser = await services.set.setDataWithSetIdAndUserId(setId, user.id)
+            const isSetBelongToUser = await services.set.setDataWithSetIdAndUserId(setId, userId)
             if (!isSetBelongToUser) {
                 throwError(ErrorTypes.SET_NOT_BELONGS_TO_THIS_USER)
             }

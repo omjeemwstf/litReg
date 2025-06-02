@@ -7,11 +7,13 @@ import { generateAuthTokens } from "../../config/token"
 import services from ".."
 import { envConfig } from "../../config/envConfigs"
 import { SIgnINMethod, emailTemplateForUserVerification } from "../../config/constants"
+import { v4 as uuidv4 } from "uuid";
+
 
 export class auth {
 
     static generateId = () => {
-        return Math.random().toString(36).substr(2, 8).toUpperCase();
+        return uuidv4();
     }
 
     static getUserByEmail = async (email: string) => {

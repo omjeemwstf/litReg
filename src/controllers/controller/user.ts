@@ -9,8 +9,8 @@ import { FolderObjectType } from "../../types/user";
 export class user {
     static userInfo: any = async (req: Request, res: Response) => {
         try {
-            const user = req["user"]["userId"]
-            const data = await services.user.getUserById(user)
+            const userId = req["user"]["userId"]
+            const data = await services.user.getUserById(userId)
             if (!data) throwError(ErrorTypes.USER_NOT_FOUND)
             return successResponse(res, 200, "User Info", data)
         } catch (error) {

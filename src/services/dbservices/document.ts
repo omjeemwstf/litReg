@@ -35,7 +35,6 @@ export class documents {
         const updatedFolders = await Promise.all(
             data.map(async (d) => {
                 try {
-                    console.log("Data is >>>>>>> ", d);
                     const updated = await postgreDb
                         .update(folders)
                         .set({ id: d._id, isProcessed: true })
@@ -138,13 +137,9 @@ export class documents {
         return addFiles;
     }
 
-    static getFileDataById = async (fileId: string, userId: string) => {
-        const user = await services.user.getUserById(userId)
-        if (!user) {
-            throwError(ErrorTypes.USER_NOT_FOUND)
-        }
+    static getFileDataById = async (fileId: string, userId: number) => {
         const response = await postgreDb.query.folders.findFirst({
-            where: and(eq(folders.id, fileId), eq(folders.userId, user.id)),
+            where: and(eq(folders.id, fileId), eq(folders.userId, userId)),
             columns: {
                 id: true,
                 type: true,
@@ -223,7 +218,8 @@ export class documents {
             })
             .returning({
                 id: instructionSheet.sheetId,
-                link: instructionSheet.link
+                link: instructionSheet.link,
+                sheetId: instructionSheet.sheetId
             })
     }
 }

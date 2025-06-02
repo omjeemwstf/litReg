@@ -1,3 +1,7 @@
+import AWS from 'aws-sdk';
+import { envConfig } from './envConfigs';
+import { v4 as uuidv4 } from "uuid";
+
 
 export enum SIgnINMethod {
   MICROSOFT = "microsoft",
@@ -36,6 +40,15 @@ export const emailTemplateForUserVerification = (email: string, name: string, ve
 `;
 
 export const generateRandomUUId = () => {
-  return Math.random().toString(36).substr(2, 8).toUpperCase();
+  return uuidv4()
 }
+
+const spacesEndpoint = new AWS.Endpoint(envConfig.uploader.endPoint);
+
+export const s3Uploader = new AWS.S3({
+  endpoint: spacesEndpoint,
+  accessKeyId: envConfig.uploader.accessKey,
+  secretAccessKey: envConfig.uploader.secretKey,
+  region: envConfig.uploader.region,
+});
 

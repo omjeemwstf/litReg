@@ -4,6 +4,7 @@ import { successResponse } from "../config/response";
 import userRouter from "./routes/user";
 import  documentsRouter  from "./routes/documents";
 import setsRouter from "./routes/sets";
+import indegatorsRouter from "./routes/indegators";
 
 const router = express.Router()
 
@@ -24,6 +25,10 @@ const routes = [
     {
         path : "/sets",
         route : setsRouter
+    },
+    {
+        path : "/llm",
+        route : indegatorsRouter
     }
 ]
 

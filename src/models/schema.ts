@@ -71,11 +71,11 @@ export const instructionSheet: any = pgTable("instructionSheet", {
 
 export const instructionSheetRelations = relations(instructionSheet, ({ one }) => ({
     user: one(users, {
-        fields: [instructionSheet.id],
+        fields: [instructionSheet.userId],
         references: [users.id]
     }),
     set: one(sets, {
-        fields: [instructionSheet.id],
+        fields: [instructionSheet.setId],
         references: [sets.id]
     })
 }))
